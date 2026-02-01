@@ -36,7 +36,7 @@ from time import time
 
  
 
-nums=['0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟']
+nums=['0️⃣ ','1️⃣ ','2️⃣ ','3️⃣ ','4️⃣ ','5️⃣ ','6️⃣ ','7️⃣ ','8️⃣ ','9️⃣ ','🔟']
 
  
 
@@ -182,7 +182,7 @@ def reveal(m,x,y):
 
       score+=10
 
-      if vis[y][x]=='0️⃣':
+      if vis[y][x]==nums[0]:
 
         score+=40
 
@@ -204,7 +204,7 @@ def reveal(m,x,y):
 
             for x1 in range(l):
 
-              if vis[y1][x1]=='0️⃣':
+              if vis[y1][x1]==nums[0]:
 
                 for i in range(-1,2):
 
@@ -274,7 +274,7 @@ def show():
 
       print(x,end=' ')
 
-    print(x,' 🅧',*nums[1:l+1])
+    print(x,' 🅧',''.join(nums[1:l+1]))
 
  
 
@@ -290,25 +290,25 @@ def show():
 
       if i == l//10:
 
-        print((nums[i]+' ')*(l%10+1))
+        print((nums[i])*(l%10+1))
 
       elif i == 0:
 
-        print((nums[i]+' ')*9, end='')
+        print((nums[i])*9, end='')
 
       else:
 
-        print((nums[i]+' ')*10,end='')
+        print((nums[i])*10,end='')
 
     if h>10:
 
       print(x,end=' ')
 
-    print(x,' 🅧',*nums[1:10],end=' ')
+    print(x,' 🅧',''.join(nums[1:10]),end='')
 
-    print((' '.join(nums[:10])+' ')*(l//10-1),end='')
+    print((''.join(nums[:10])+' ')*(l//10-1),end='')
 
-    print(*nums[:l%10+1])
+    print(''.join(nums[:l%10+1]))
 
  
 
@@ -320,25 +320,25 @@ def show():
 
       if i+1==h//3:
 
-        print(nums[i+1],x,*vis[i], end='')
+        print(nums[i+1],x,''.join(vis[i]), end='')
 
         print('   lives:', *lives)
 
       elif i+1==2*h//3:
 
-        print(nums[i+1],x,*vis[i], end='')
+        print(nums[i+1],x,''.join(vis[i]), end='')
 
         print('   score:',nums[score//1000],nums[(score%1000)//100],nums[((score%1000)%100)//10],nums[0])
 
       else:
 
-        print(nums[i+1],x,*vis[i])
+        print(nums[i+1],x,''.join(vis[i]))
 
  
 
   else:
 
-    print(' 🅨︎  🅨︎ '+ (x+' ') * (l+1))
+    print(' 🅨︎ 🅨︎ '+ (x+' ') * (l+1))
 
     for i in range(h):
 
@@ -346,20 +346,19 @@ def show():
 
       if i+1==h//3:
 
-        print(nums[i//10],nums[i%10],x,*vis[i-1],end='')
+        print(nums[i//10]+nums[i%10],x,''.join(vis[i-1]),end='')
 
         print('   lives:', *lives)
 
       elif i+1==2*h//3:
 
-        print(nums[i//10],nums[i%10],x,*vis[i-1],end='')
+        print(nums[i//10]+nums[i%10],x,''.join(vis[i-1]),end='')
 
         print('   score:', nums[score//1000],nums[(score%1000)//100],nums[((score%1000)%100)//10],nums[0])
 
       else:
 
-        print(nums[i//10],nums[i%10],x,*vis[i-1])
-
+        print(nums[i//10]+nums[i%10],x,''.join(vis[i-1]))
  
 
 def check(x,y):
@@ -394,7 +393,7 @@ def check(x,y):
 
     return [False,True]
 
-  if '❤️' in lives:
+  if '❤️ ' in lives:
 
     return [True,lives]
 
@@ -404,7 +403,7 @@ def check(x,y):
 
  
 
-lives=['❤️','❤️','❤️']
+lives=['❤️ ','❤️ ','❤️ ']
 
 score=0
 
@@ -415,7 +414,7 @@ start=time()
  
 
 for i in range(3):
-
+  i=1
   level_st=time()
 
   if i == 0:
