@@ -1,2 +1,2 @@
 # MineSweeper
-Minesweeper game in python
+Different games in Python *unfinished* Have a try!
