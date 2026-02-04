@@ -1,2 +1,2 @@
 # MineSweeper
-Different games in Python *unfinished* Have a try!
+Different games in Python (*unfinished*) Have a try!
