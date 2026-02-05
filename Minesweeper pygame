@@ -1,7 +1,6 @@
 from random import randint as ran
 from time import sleep as s
 import pygame
-from time import time
 
 # NOTES:
 # Minesweeper game!
@@ -37,7 +36,7 @@ def gen(density,x,y):
 
   while mines>0:
     a=indexes[ran(0,len(indexes)-1)]
-    board[a[0]][a[1]]='💣'
+    board[a[0]][a[1]]=-1
     mines-=1
     indexes.remove(a)
   return board
@@ -46,14 +45,14 @@ def numbers(x,y):
   global board
   for i in range(y):
     for j in range(x):
-      if board[i][j]=='💣':
+      if board[i][j]==-1:
         pass
       else:
         num=0
         for k in range(-1,2):
           for l in range(-1,2):
             if 0<=i+k<y and 0<=j+l<x:
-              if board[i+k][j+l]=='💣':
+              if board[i+k][j+l]==-1:
                 num+=1
         board[i][j]=num
   return board
@@ -79,22 +78,42 @@ def genvis(x,y):
     vis[a[0]][a[1]]=g
   return vis
 
+def time(set):
+  global l
+  mins=int((pygame.time.get_ticks()-set)/60000)
+  if mins<10:
+    mins='0'+str(mins)
+  secs=int(((pygame.time.get_ticks()-set)/1000)%60)
+  if secs<10:
+    secs='0'+str(secs)
+  return font.render(f'{mins}:{secs}', True, (w))
+
 def show():
-  global vis
+  global vis, lives, l
+
+  screen.blit(time(level_st), (l*40-100,10))
+
+  for i in range(lives):
+    screen.blit(heart_r, (i*60+10,3))
+  for i in range(3-lives):
+    screen.blit(heart_g, ((i+lives)*60+10,3))
   for i in range(len(vis)):
     for j in range(len(vis[i])):
-      if str(vis[i][j]) in "💣💥":
-        pygame.draw.circle(screen, (r), (j*40+30,i*40+30), 15)
+
+      if vis[i][j] == -1 or vis[i][j] == -2:
+        pygame.draw.rect(screen, (200,200,200), (j*40+10,i*40+50,39,39))
+        screen.blit(explosion, (j*40,i*40+38))
       
       elif str(vis[i][j]) in "012345678":
-        pygame.draw.rect(screen, (200,200,200), (j*40+10,i*40+10,39,39))
+        pygame.draw.rect(screen, (200,200,200), (j*40+10,i*40+50,39,39))
         text=font.render(str(vis[i][j]), True, (numcolours[vis[i][j]]))
-        screen.blit(text, (j*40+25,i*40+15))
-
+        screen.blit(text, (j*40+20,i*40+55))
+      elif vis[i][j]=='f':
+        pygame.draw.rect(screen, (w), (j*40+10,i*40+50,39,39))
+        screen.blit(flag, (j*40+10,i*40+50))
       else:
-        pygame.draw.rect(screen, vis[i][j], (j*40+10,i*40+10,39,39))
+        pygame.draw.rect(screen, vis[i][j], (j*40+10,i*40+50,39,39))
     
-
 def reveal(m,x,y):
   global board
   global vis
@@ -113,31 +132,36 @@ def reveal(m,x,y):
         while True:
           if vis==check:
             break
+          
           check=[]
           for i in vis:
             check.append(i.copy())
+          screen.fill((0,0,0))
+          show()
+          pygame.display.flip()
+          clock.tick(20)
+          z=0
           for y1 in range(h):
             for x1 in range(l):
-              if vis[y1][x1]==0:
+              if check[y1][x1]==0:
                 for i in range(-1,2):
                   for j in range(-1,2):
                     a=y1+j
                     b=x1+i
                     if 0<=b<l and 0<=a<h:
                       vis[a][b]=board[a][b]
-      elif vis[y][x]=='💣':
+                      
+      elif vis[y][x]==-1:
         score-=10
-        vis[y][x]='💥'
-        board[y][x]='💥'
-        for i in reversed(range(3)):
-          if lives[i]=='❤️':
-            lives[i]='🖤'
-            break
+        vis[y][x]=-2
+        board[y][x]=-2
+        lives-=1
+
   else:
-    if vis[y][x]=='⬜':
-      vis[y][x]='🚩'
-    elif vis[y][x]=='🚩':
-      vis[y][x]='⬜'
+    if vis[y][x]==w:
+      vis[y][x]='f'
+    elif vis[y][x]=='f':
+      vis[y][x]=w
   return [vis,z]
 
 def check(x,y):
@@ -146,7 +170,7 @@ def check(x,y):
   z=0
   for i in range(y):
     for j in range(x):
-      if board[i][j]=='💣':
+      if board[i][j]==-1:
         pass
       else:
         if board[i][j]!=vis[i][j]:
@@ -156,25 +180,25 @@ def check(x,y):
       break
   if z==0:
     return [False,True]
-  if '❤️ ' in lives:
+  if lives>0:
     return [True,lives]
   else:
     return [False,False]
 
-lives=['❤️ ','❤️ ','❤️ ']
+lives=3
 score=0
-start=time()
 
 pygame.init()
 
+total_time=0
 font = pygame.font.SysFont(None, 48)
 clock = pygame.time.Clock()
 
 for i in range(3):
   try:
     pygame.event.clear(pygame.MOUSEBUTTONDOWN)
+    total_time+=int((pygame.time.get_ticks()-level_st)//1000)
   except:pass
-  level_st=time()
   if i == 0:
     l=10
     h=10
@@ -188,17 +212,35 @@ for i in range(3):
     h=20
     d=20
 
-  screen = pygame.display.set_mode((l*40+20,h*40+20))
+  screen = pygame.display.set_mode((l*40+20,h*40+60))
+
+  screen.fill((0,0,0))
+  text=font.render(f'Level {i+1}', True, (255,255,255))
+  screen.blit(text, (l*20+10-text.get_width()//2,h*20+30-text.get_height()//2))
+  pygame.display.flip()
+  s(3)
+
+  flag = pygame.image.load("flag.png").convert_alpha()
+  flag = pygame.transform.scale(flag, (40,40))
+  explosion = pygame.image.load("explosion.png").convert_alpha()
+  explosion = pygame.transform.scale(explosion, (60,60))
+  heart_r= pygame.image.load("heart_r.png").convert_alpha()
+  heart_r = pygame.transform.scale(heart_r, (43,43))
+  heart_g= pygame.image.load("heart_g.png").convert_alpha()
+  heart_g = pygame.transform.scale(heart_g, (43,43))
 
   board=gen(d,l,h)
   board=numbers(l,h)
   vis=genvis(l,h)
   c=check(l,h)
 
-  show()
-  pygame.display.flip()
+  level_st=pygame.time.get_ticks()
+
+  
   while c[0]:
-    
+    screen.fill((0,0,0))
+    show()
+    pygame.display.flip()
     z=1
     lives=c[1]
     for event in pygame.event.get():
@@ -208,30 +250,38 @@ for i in range(3):
 
       if event.type == pygame.MOUSEBUTTONDOWN:
         mx,my=pygame.mouse.get_pos()
-        mx//=40
-        my//=40
-        if event.button == 1:
-          m='r'
-        else:
-          m='f'
-        reveal(m,mx,my)
-        show()
-        pygame.display.flip()
-        c=check(l,h)
-  if c[1]:
-    print(f'level {i+1} completed in a time of: {(time()-level_st)//60} minutes and {(time()-level_st)%60} seconds')
-    s(3)
+        mx=(mx-10)//40
+        my=(my-50)//40
+        if 0<=mx<l and 0<=my<h:
+          if event.button == 1:
+            m='r'
+          else:
+            m='f'
+          reveal(m,mx,my)
+          c=check(l,h)
   if not c[1]:
     break
 
+screen.fill((0,0,0))
+show()
+pygame.display.flip()
+s(3)
+
+total_time+=int((pygame.time.get_ticks()-level_st)//1000)
+
 if check(l,h)[1]:
-  print()
-  print('VICTORY')
-  print(f'you took a total time of {(time()-level_st)//60} minutes and {(time()-level_st)%60} to beat the game and got a score of {score}.')
+  screen.fill((0,0,0))
+  text=font.render(f'Victory!', True, (0,255,0))
+  screen.blit(text, (l*20+10-text.get_width()//2,h*20+30-text.get_height()//2))
+  pygame.display.flip()
+  s(2)
 else:
-  for i in range(h):
-    for j in range(l):
-      if board[i][j]=='💣':
-        vis[i][j]='💣'
-  print()
-  print('DEFEAT')
+  screen.fill((0,0,0))
+  text=font.render(f'Defeat!', True, (255,0,0))
+  screen.blit(text, (l*20+10-text.get_width()//2,h*20+30-text.get_height()//2))
+  pygame.display.flip()
+  s(2)
+text=font.render(f'In {total_time//60} minutes {int(total_time%60)} seconds', True, (255,255,255))
+screen.blit(text, (l*20+10-text.get_width()//2,h*20+text.get_height()//2+40))
+pygame.display.flip()
+s(3)
