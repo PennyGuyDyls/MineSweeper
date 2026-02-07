@@ -24,13 +24,8 @@ r=(255,0,0)
 numcolours=[(200,200,200),(0,0,255),(0,128,0),(255,0,0),(0,0,128),(128,0,0),(0,128,128),(0,0,0),(128,128,128)]
 
 def gen(density,x,y):
-  board=[]
-  indexes=[]
-  for i in range(y):
-    board.append([])
-    for j in range(x):
-      board[i].append(' ')
-      indexes.append([i,j])
+  board=[[' ' for j in range(x)] for i in range(y)]
+  indexes=[[i,j] for i in range(y) for j in range(x)]
 
   mines=x*y*density//100
 
@@ -65,11 +60,8 @@ def genvis(x,y):
     for j in range(x):
       vis[i].append(w)
   for i in range(9):
-    indexes=[]
-    for j in range(x):
-      for k in range(y):
-        if board[k][j]==i:  
-          indexes.append([k,j])
+    indexes=[[k,j] for j in range(x) for k in range(y) if board[k][j]==i]
+    
     if indexes != []:
       break
 
@@ -120,14 +112,11 @@ def reveal(m,x,y):
   global l
   global h
   global lives
-  global score
   z=1
   if m == 'r':
     if vis[y][x] == w or vis[y][x] == g:
       vis[y][x]=board[y][x]
-      score+=10
       if vis[y][x]==0:
-        score+=40
         check=[]
         while True:
           if vis==check:
@@ -152,7 +141,6 @@ def reveal(m,x,y):
                       vis[a][b]=board[a][b]
                       
       elif vis[y][x]==-1:
-        score-=10
         vis[y][x]=-2
         board[y][x]=-2
         lives-=1
@@ -185,11 +173,9 @@ def check(x,y):
   else:
     return [False,False]
 
-lives=3
-score=0
-
 pygame.init()
 
+lives=3
 total_time=0
 font = pygame.font.SysFont(None, 48)
 clock = pygame.time.Clock()
