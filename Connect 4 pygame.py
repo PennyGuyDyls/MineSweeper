@@ -1,5 +1,4 @@
 import pygame
-from time import sleep as s
 
 w=(30,30,30)
 r=(255,20,20)
@@ -237,7 +236,7 @@ elif d2[0]:
     pygame.draw.line(screen, d2[2], (startx, starty), (endx, endy), 10)
 
 pygame.display.flip()
-s(5)
+pygame.time.wait(5000)
 
 
             
