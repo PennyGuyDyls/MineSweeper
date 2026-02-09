@@ -204,7 +204,7 @@ for i in range(3):
   text=font.render(f'Level {i+1}', True, (255,255,255))
   screen.blit(text, (l*20+10-text.get_width()//2,h*20+30-text.get_height()//2))
   pygame.display.flip()
-  s(3)
+  pygame.time.wait(3000)
 
   flag = pygame.image.load("flag.png").convert_alpha()
   flag = pygame.transform.scale(flag, (40,40))
@@ -251,7 +251,7 @@ for i in range(3):
 screen.fill((0,0,0))
 show()
 pygame.display.flip()
-s(3)
+pygame.time.wait(3000)
 
 total_time+=int((pygame.time.get_ticks()-level_st)//1000)
 
@@ -260,14 +260,14 @@ if check(l,h)[1]:
   text=font.render(f'Victory!', True, (0,255,0))
   screen.blit(text, (l*20+10-text.get_width()//2,h*20+30-text.get_height()//2))
   pygame.display.flip()
-  s(2)
+  pygame.time.wait(2000)
 else:
   screen.fill((0,0,0))
   text=font.render(f'Defeat!', True, (255,0,0))
   screen.blit(text, (l*20+10-text.get_width()//2,h*20+30-text.get_height()//2))
   pygame.display.flip()
-  s(2)
+  pygame.time.wait(2000)
 text=font.render(f'In {total_time//60} minutes {int(total_time%60)} seconds', True, (255,255,255))
 screen.blit(text, (l*20+10-text.get_width()//2,h*20+text.get_height()//2+40))
 pygame.display.flip()
-s(3)
+pygame.time.wait(3000)
