@@ -6,7 +6,7 @@ class Paddle1(pygame.sprite.Sprite):
         self.image = pygame.Surface((8,200))
         self.image.fill((255, 0, 0))
         self.rect = self.image.get_rect()
-        self.rect.center = (100, 300)
+        self.rect.center = (100, 500)
 
     def update(self,d):
         if 100<self.rect.centery+d<900:
@@ -18,7 +18,7 @@ class Paddle2(pygame.sprite.Sprite):
         self.image = pygame.Surface((8,200))
         self.image.fill((255, 0, 0))
         self.rect = self.image.get_rect()
-        self.rect.center = (1400, 300)
+        self.rect.center = (1400, 500)
 
     def update(self,d):
         if 100<self.rect.centery+d<900:
@@ -34,8 +34,8 @@ class Ball(pygame.sprite.Sprite):
 
     def update(self,ang,speed):
         
-        self.rect.centerx+=(10-ang)*speed
-        self.rect.centery+=ang*speed
+        self.rect.centerx+=speed
+        self.rect.centery+=ang
 
 pygame.init()
 screen=pygame.display.set_mode((1500,1000))
@@ -51,12 +51,32 @@ ball = pygame.sprite.Group()
 ball.add(ballspr)
 direction1,direction2 = 0,0
 angle=0
-speed=-1
+speed=-10
 running=True
-while running:
-    clock.tick(15)
+font=pygame.font.SysFont(None, 48)
+score=[0,0]
+while 2 not in score and running:
+    clock.tick(30)
+
+    if 0>ballspr.rect.centerx:
+        score[1]+=1
+        ballspr.rect.center=(750,500)
+        padSpr1.rect.centery=500
+        padSpr2.rect.centery=500
+        angle=0
+        speed=-10
+    elif ballspr.rect.centerx>1500:
+        score[0]+=1
+        ballspr.rect.center=(750,500)
+        padSpr1.rect.centery=500
+        padSpr2.rect.centery=500
+        angle=0
+        speed=-10
+    text= font.render((f'{score[0]}:{score[1]}'),True,(255,255,255))
 
     screen.fill((0,0,0))
+    
+    screen.blit(text,(750,30))
     paddle1.update(direction1*-10)
     paddle1.draw(screen)
     paddle2.update(direction2*-10)
@@ -94,12 +114,14 @@ while running:
 
     if pygame.sprite.collide_rect(ballspr,padSpr1) or pygame.sprite.collide_rect(ballspr,padSpr2):
         if speed>0:
-            speed+=0.1
+            speed+=1
         else:
-            speed-=0.1
+            speed-=1
         speed*=-1
-
-        angle=(ballspr.rect.centery - padSpr1.rect.centery)//11
+        if pygame.sprite.collide_rect(ballspr,padSpr1):
+            angle=(ballspr.rect.centery - padSpr1.rect.centery)//11
+        elif pygame.sprite.collide_rect(ballspr,padSpr2):
+            angle=(ballspr.rect.centery - padSpr2.rect.centery)//11
 
             
             
