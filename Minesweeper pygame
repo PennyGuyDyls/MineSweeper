@@ -1,5 +1,4 @@
 from random import randint as ran
-from time import sleep as s
 import pygame
 
 # NOTES:

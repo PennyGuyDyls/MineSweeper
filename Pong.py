@@ -53,7 +53,7 @@ direction1,direction2 = 0,0
 angle=0
 speed=-10
 running=True
-font=pygame.font.SysFont(None, 48)
+font=pygame.font.SysFont(None, 100)
 score=[0,0]
 while 2 not in score and running:
     clock.tick(30)
@@ -65,6 +65,8 @@ while 2 not in score and running:
         padSpr2.rect.centery=500
         angle=0
         speed=-10
+        pygame.draw.line()
+        pygame.time.wait(2000)
     elif ballspr.rect.centerx>1500:
         score[0]+=1
         ballspr.rect.center=(750,500)
@@ -72,11 +74,12 @@ while 2 not in score and running:
         padSpr2.rect.centery=500
         angle=0
         speed=-10
+        pygame.time.wait(2000)
     text= font.render((f'{score[0]}:{score[1]}'),True,(255,255,255))
 
     screen.fill((0,0,0))
     
-    screen.blit(text,(750,30))
+    screen.blit(text,(700,30))
     paddle1.update(direction1*-10)
     paddle1.draw(screen)
     paddle2.update(direction2*-10)
