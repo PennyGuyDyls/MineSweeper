@@ -22,5 +22,5 @@ while True:
     all_sprites.update()
     all_sprites.draw(screen)
     pygame.display.flip()
-    clock.tick(5)
+    clock.tick(14)
 

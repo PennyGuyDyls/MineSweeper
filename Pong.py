@@ -37,61 +37,64 @@ class Ball(pygame.sprite.Sprite):
         self.rect.centerx+=speed
         self.rect.centery+=ang
 
+
+
+
 pygame.init()
 screen=pygame.display.set_mode((1500,1000))
 clock=pygame.time.Clock()
+font=pygame.font.SysFont(None, 100)
+
 padSpr1=Paddle1()
-paddle1 = pygame.sprite.Group()
-paddle1.add(padSpr1)
 padSpr2=Paddle2()
-paddle2 = pygame.sprite.Group()
-paddle2.add(padSpr2)
 ballspr=Ball()
-ball = pygame.sprite.Group()
-ball.add(ballspr)
+
 direction1,direction2 = 0,0
 angle=0
 speed=-10
+
 running=True
-font=pygame.font.SysFont(None, 100)
 score=[0,0]
 while 2 not in score and running:
     clock.tick(30)
 
     if 0>ballspr.rect.centerx:
         score[1]+=1
+        pygame.draw.line(screen, (255,0,0),(0,0),(0,1000),10)
+        pygame.display.flip()
+        pygame.time.wait(1000)
         ballspr.rect.center=(750,500)
         padSpr1.rect.centery=500
         padSpr2.rect.centery=500
         angle=0
         speed=-10
-        pygame.draw.line()
-        pygame.time.wait(2000)
     elif ballspr.rect.centerx>1500:
         score[0]+=1
+        pygame.draw.line(screen, (255,0,0),(0,0),(0,1000),10)
+        pygame.display.flip()
+        pygame.time.wait(1000)
         ballspr.rect.center=(750,500)
         padSpr1.rect.centery=500
         padSpr2.rect.centery=500
         angle=0
         speed=-10
-        pygame.time.wait(2000)
     text= font.render((f'{score[0]}:{score[1]}'),True,(255,255,255))
 
     screen.fill((0,0,0))
     
     screen.blit(text,(700,30))
-    paddle1.update(direction1*-10)
-    paddle1.draw(screen)
-    paddle2.update(direction2*-10)
-    paddle2.draw(screen)
+    padSpr1.update(direction1*-10)
+    screen.blit(padSpr1.image,padSpr1.rect)
+    padSpr2.update(direction2*-10)
+    screen.blit(padSpr2.image,padSpr2.rect)
 
     if 25>ballspr.rect.centery:
         angle*=-1
     elif ballspr.rect.centery>975:
         angle*=-1
 
-    ball.update(angle,speed)
-    ball.draw(screen)
+    ballspr.update(angle,speed)
+    screen.blit(ballspr.image,ballspr.rect)
     pygame.display.flip()
 
     for event in pygame.event.get():
