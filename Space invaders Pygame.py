@@ -5,11 +5,13 @@ class cannon(pygame.sprite.Sprite):
         super().__init__()
         self.image = cannon1
         self.rect = self.image.get_rect()
-        self.rect.center = (1400,800)
+        self.rect.center = (100,800)
         self.state = 'LOADED'
+        self.score = 0
 
     def move(self,direction):
-        self.rect.centerx+=direction
+        if self.rect.centerx-self.rect.width+direction//2>=0 and self.rect.centerx+self.rect.width+direction<=1500:
+            self.rect.centerx+=direction
 
     def shoot(self):
         self.state = 'EMPTY'
@@ -22,14 +24,14 @@ class cannon(pygame.sprite.Sprite):
 class shot(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((6,25))
+        self.image = pygame.Surface((3,20))
         self.image.fill((255, 0, 0))
         self.rect = self.image.get_rect()
         self.rect.center = (1000,800)
         self.state = 'LOADED'
 
     def shoot(self):
-        self.rect.centery-=10
+        self.rect.centery-=5
         self.state = 'FIRING'
 
     def follow(self, player):
@@ -43,7 +45,7 @@ class alien1(pygame.sprite.Sprite):
         super().__init__()
         self.image = alien1_img_1
         self.rect = self.image.get_rect()
-        self.rect.center = (i*120+60,x)
+        self.rect.center = (i*60+60,x)
         self.state='ALIVE'
         self.stage=1
 
@@ -64,13 +66,14 @@ class alien1(pygame.sprite.Sprite):
     def die(self):
         self.image=pygame.Surface((100,100),pygame.SRCALPHA)
         self.state='DEAD'
+        player.score += 10
 
 class alien2(pygame.sprite.Sprite):
     def __init__(self,i,x):
         super().__init__()
         self.image = alien2_img_1
         self.rect = self.image.get_rect()
-        self.rect.center = (i*120+60,x)
+        self.rect.center = (i*60+60,x)
         self.state='ALIVE'
         self.stage=1
 
@@ -86,11 +89,40 @@ class alien2(pygame.sprite.Sprite):
                 self.image = alien2_img_2
                 cen=self.rect.center
                 self.rect = self.image.get_rect()
-                self.rect.center=cen          
+                self.rect.center=cen 
 
     def die(self):
         self.image=pygame.Surface((100,100),pygame.SRCALPHA)
         self.state='DEAD'
+        player.score += 20
+
+class alien3(pygame.sprite.Sprite):
+    def __init__(self,i,x):
+        super().__init__()
+        self.image = alien3_img_1
+        self.rect = self.image.get_rect()
+        self.rect.center = (i*60+60,x)
+        self.state='ALIVE'
+        self.stage=1
+
+    def animate(self):
+        if self.state=='ALIVE':
+            self.stage*=-1
+            if self.stage == -1:
+                self.image = alien3_img_1
+                cen=self.rect.center
+                self.rect = self.image.get_rect()
+                self.rect.center=cen
+            else:
+                self.image = alien3_img_2
+                cen=self.rect.center
+                self.rect = self.image.get_rect()
+                self.rect.center=cen         
+
+    def die(self):
+        self.image=pygame.Surface((100,100),pygame.SRCALPHA)
+        self.state='DEAD'
+        player.score += 50
 
 def show(aliens,player,bullet):
     for i in aliens:  
@@ -98,11 +130,13 @@ def show(aliens,player,bullet):
             screen.blit(i[j].image,i[j].rect)
     screen.blit(player.image,player.rect)
     screen.blit(bullet.image,bullet.rect)
+    text=font.render('Score:'+str(player.score),True,(255,255,0))
+    screen.blit(text,(5,5))
 
 def check(aliens):
     for i in reversed(aliens):
         for j in range(len(i)):
-            if i[j].state=='ALIVE' and i[j].rect.centery>=800:
+            if i[j].state=='ALIVE' and i[j].rect.centery>=750:
                 return False
     return True
 
@@ -113,18 +147,22 @@ font=pygame.font.SysFont(None, 100)
 
 
 alien1_img_1 = pygame.image.load("Alien 1 state 1.png").convert_alpha()
-alien1_img_1 = pygame.transform.scale(alien1_img_1, (75,85))
+alien1_img_1 = pygame.transform.scale(alien1_img_1, (40,40))
 alien1_img_2 = pygame.image.load("Alien 1 state 2.png").convert_alpha()
-alien1_img_2 = pygame.transform.scale(alien1_img_2, (62,85))
+alien1_img_2 = pygame.transform.scale(alien1_img_2, (33,40))
 alien2_img_1 = pygame.image.load("Alien 2 state 1.png").convert_alpha()
-alien2_img_1 = pygame.transform.scale(alien2_img_1, (61,100))
+alien2_img_1 = pygame.transform.scale(alien2_img_1, (30,50))
 alien2_img_2 = pygame.image.load("Alien 2 state 2.png").convert_alpha()
-alien2_img_2 = pygame.transform.scale(alien2_img_2, (80,100))
+alien2_img_2 = pygame.transform.scale(alien2_img_2, (40,50))
+alien3_img_1 = pygame.image.load("Alien 3 state 1.png").convert_alpha()
+alien3_img_1 = pygame.transform.scale(alien3_img_1, (40,50))
+alien3_img_2 = pygame.image.load("Alien 3 state 2.png").convert_alpha()
+alien3_img_2 = pygame.transform.scale(alien3_img_2, (40,50))
 
 cannon1 = pygame.image.load("Cannon_loaded.png").convert_alpha()
-cannon1 = pygame.transform.scale(cannon1, (200,200))
+cannon1 = pygame.transform.scale(cannon1, (100,100))
 cannon2 = pygame.image.load("Cannon_empty.png").convert_alpha()
-cannon2 = pygame.transform.scale(cannon2, (200,200))
+cannon2 = pygame.transform.scale(cannon2, (100,100))
 
 
 
@@ -133,11 +171,17 @@ direction=0
 
 bullet=shot()
 
-aliens1=[alien1(i,500) for i in range(10)]
-aliens2=[alien1(i,400) for i in range(10)]
-aliens3=[alien2(i,300) for i in range(10)]
-aliens4=[alien2(i,200) for i in range(10)]
-aliens=[aliens1,aliens2,aliens3,aliens4]
+row_number=11
+gap_distance=50
+starty=150
+aliens1=[alien1(i,gap_distance*5+starty) for i in range(row_number)]
+aliens2=[alien1(i,gap_distance*4+starty) for i in range(row_number)]
+aliens3=[alien2(i,gap_distance*3+starty) for i in range(row_number)]
+aliens4=[alien2(i,gap_distance*2+starty) for i in range(row_number)]
+aliens5=[alien3(i,gap_distance+starty) for i in range(row_number)]
+aliens=[aliens1,aliens2,aliens3,aliens4,aliens5]
+anifreq=1400
+movfreq=2500
 aldirection=(40,0)
 down=False
 
@@ -149,24 +193,25 @@ running=True
 while running and check(aliens):
     clock.tick(100)
 
-    if pygame.time.get_ticks()-animtime>=300:
+    if pygame.time.get_ticks()-animtime>=anifreq:
         for i in aliens:
             for j in range(len(aliens1)):
                i[j].animate()
             animtime=pygame.time.get_ticks()
 
-    if pygame.time.get_ticks()-movtime>=500:
+    if pygame.time.get_ticks()-movtime>=movfreq:
         left=aliens1[0].rect.centerx
         right=aliens1[-1].rect.centerx
         if down:
             down=False
             if left < 60:
-                aldirection = (20,0)
+                aldirection = (40,0)
             elif right > 1440:
-                aldirection = (-20,0)
+                aldirection = (-40,0)
         else:
             if left<60 or right>1440:
-                aldirection = (0,50  )
+                aldirection = (0,50)
+                movfreq-=100
                 down=True
         for i in aliens:
             for j in range(len(i)):
@@ -205,9 +250,9 @@ while running and check(aliens):
 
         elif event.type==pygame.KEYDOWN:
             if event.key==pygame.K_RIGHT:
-                direction = 6
+                direction = 5
             elif event.key==pygame.K_LEFT:
-                direction = -6
+                direction = -5
             elif event.key==pygame.K_SPACE and player.state == 'LOADED':
                 bullet.follow(player)
                 player.shoot()
