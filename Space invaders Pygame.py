@@ -1,5 +1,7 @@
 import pygame
 
+
+
 class cannon(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -45,7 +47,7 @@ class alien1(pygame.sprite.Sprite):
         super().__init__()
         self.image = alien1_img_1
         self.rect = self.image.get_rect()
-        self.rect.center = (i*60+60,x)
+        self.rect.center = (i*60+200,x)
         self.state='ALIVE'
         self.stage=1
 
@@ -73,7 +75,7 @@ class alien2(pygame.sprite.Sprite):
         super().__init__()
         self.image = alien2_img_1
         self.rect = self.image.get_rect()
-        self.rect.center = (i*60+60,x)
+        self.rect.center = (i*60+200,x)
         self.state='ALIVE'
         self.stage=1
 
@@ -101,7 +103,7 @@ class alien3(pygame.sprite.Sprite):
         super().__init__()
         self.image = alien3_img_1
         self.rect = self.image.get_rect()
-        self.rect.center = (i*60+60,x)
+        self.rect.center = (i*60+200,x)
         self.state='ALIVE'
         self.stage=1
 
@@ -123,6 +125,40 @@ class alien3(pygame.sprite.Sprite):
         self.image=pygame.Surface((100,100),pygame.SRCALPHA)
         self.state='DEAD'
         player.score += 50
+
+def menu():
+    font=pygame.font.SysFont(None, 100)
+    text=font.render('SPACE INVADERS',True,(255,255,0))
+    screen.blit(text,(screen.get_width()//2-text.get_width()//2,100))
+    font=pygame.font.SysFont(None, 30)
+    pygame.display.flip()
+    pygame.time.wait(1000)
+    text=font.render('= 100 POINTS',True,(255,255,0))
+    screen.blit(alien1_img_1,(screen.get_width()//2-alien1_img_1.get_width()-text.get_width()//2-10,240))
+    screen.blit(text,(screen.get_width()//2-text.get_width()//2+10,250))
+    pygame.display.flip()
+    pygame.time.wait(500)
+    text=font.render('= 200 POINTS',True,(255,255,0))
+    screen.blit(alien2_img_1,(screen.get_width()//2-alien1_img_1.get_width()-text.get_width()//2-10,340))
+    screen.blit(text,(screen.get_width()//2-text.get_width()//2+10,350))
+    pygame.display.flip()
+    pygame.time.wait(500)
+    text=font.render('= 500 POINTS',True,(255,255,0))
+    screen.blit(alien3_img_1,(screen.get_width()//2-alien1_img_1.get_width()-text.get_width()//2-10,440))
+    screen.blit(text,(screen.get_width()//2-text.get_width()//2+10,450))
+    pygame.display.flip()
+    pygame.time.wait(1000)
+    pygame.draw.rect(screen, (0,255,0), (600,600, 300,200))
+    font=pygame.font.SysFont(None, 100)
+    text=font.render('START',True,(255,255,255))
+    screen.blit(text,(screen.get_width()//2-text.get_width()//2,700-text.get_height()//2))
+    pygame.display.flip()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mx, my = pygame.mouse.get_pos()
+                if 600<=mx<=900 and 600<=my<=800:
+                    return None
 
 def show(aliens,player,bullet):
     for i in aliens:  
@@ -189,7 +225,7 @@ animtime=pygame.time.get_ticks()
 movtime=pygame.time.get_ticks()
 
 running=True
-
+menu()
 while running and check(aliens):
     clock.tick(100)
 
@@ -204,14 +240,15 @@ while running and check(aliens):
         right=aliens1[-1].rect.centerx
         if down:
             down=False
-            if left < 60:
+            if left < 200:
                 aldirection = (40,0)
-            elif right > 1440:
+            elif right > 1300:
                 aldirection = (-40,0)
         else:
             if left<60 or right>1440:
                 aldirection = (0,50)
                 movfreq-=100
+                anifreq-=70
                 down=True
         for i in aliens:
             for j in range(len(i)):
