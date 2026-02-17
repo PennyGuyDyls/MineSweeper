@@ -16,7 +16,6 @@ class cannon(pygame.sprite.Sprite):
             self.rect.centerx+=direction
 
     def shoot(self):
-        shoot_sound.play()
         self.state = 'EMPTY'
         self.image = cannon2
 
@@ -56,7 +55,6 @@ class alien(pygame.sprite.Sprite):
         self.stage=1
         self.bullets=0
         self.deathstage=0
-        self.volume=score/100*2
 
     def img_swap(self, img):
         self.image = img
@@ -78,8 +76,6 @@ class alien(pygame.sprite.Sprite):
             self.state='DEAD'
         else:
             if self.state == 'ALIVE':
-                alien_die_sound.set_volume(self.volume)
-                alien_die_sound.play()
                 self.state = 'DYING'
                 player.score += self.score
                 self.img_swap(alsplode_anim[self.deathstage])
@@ -114,11 +110,11 @@ def menu():
     pygame.time.wait(1000)
 
     font=pygame.font.SysFont(None, 30)
-    show_pair(100,alimages[0][0],240)
+    show_pair(100,alien1_img_1,240)
     pygame.time.wait(500)
-    show_pair(200,alimages[1][0],340)
+    show_pair(200,alien2_img_1,340)
     pygame.time.wait(500)
-    show_pair(500,alimages[2][0],440)
+    show_pair(500,alien3_img_1,440)
     pygame.time.wait(1000)
 
     stcolour=(0,200,0)
@@ -163,10 +159,14 @@ def menu():
                     excolour=(200,0,0)
 
 def initiate_aliens(gap_distance,starty):
-    scores=[10,10,20,20,50]
-    alientypes=[0,0,1,1,2]
-    aliens=[[alien(i,gap_distance*(5-j)+starty,alimages[alientypes[j]][0],alimages[alientypes[j]][1],scores[j]) for i in range(row_number)] for j in reversed(range(5))]
-    return aliens[0],aliens,starty
+    aliens1=[alien(i,gap_distance*5+starty,alien1_img_1,alien1_img_2,10) for i in range(row_number)]
+    aliens2=[alien(i,gap_distance*4+starty,alien1_img_1,alien1_img_2,10) for i in range(row_number)]
+    aliens3=[alien(i,gap_distance*3+starty,alien2_img_1,alien2_img_2,20) for i in range(row_number)]
+    aliens4=[alien(i,gap_distance*2+starty,alien2_img_1,alien2_img_2,20) for i in range(row_number)]
+    aliens5=[alien(i,gap_distance+starty,alien3_img_1,alien3_img_2,50) for i in range(row_number)]
+    
+    aliens=[aliens1,aliens2,aliens3,aliens4,aliens5]
+    return aliens1,aliens,starty
 
 def show(aliens,player,bullet,albullets):
     for i in aliens:  
@@ -202,31 +202,31 @@ def alien_respawn(starty,dy):
     return initiate_aliens(dy,starty)
 
 pygame.init()
-pygame.mixer.init()
 screen=pygame.display.set_mode((1500,1000))
 clock=pygame.time.Clock()
 font=pygame.font.SysFont(None, 100)
 
-IMG_DIR='Space Invaders/Images/'
 
-alimages = [[pygame.image.load(f"{IMG_DIR}Alien {i} state {j}.png").convert_alpha() for j in range(1,3)] for i in range(1,4)]
-scalefactors= [[(40,40),(33,40)],[(30,50),(40,50)],[(40,50),(40,50)]]
-for i in range(len(alimages)):
-    for j in range(len(alimages[i])):
-        alimages[i][j] = pygame.transform.scale(alimages[i][j], scalefactors[i][j])
+alien1_img_1 = pygame.image.load("Alien 1 state 1.png").convert_alpha()
+alien1_img_1 = pygame.transform.scale(alien1_img_1, (40,40))
+alien1_img_2 = pygame.image.load("Alien 1 state 2.png").convert_alpha()
+alien1_img_2 = pygame.transform.scale(alien1_img_2, (33,40))
+alien2_img_1 = pygame.image.load("Alien 2 state 1.png").convert_alpha()
+alien2_img_1 = pygame.transform.scale(alien2_img_1, (30,50))
+alien2_img_2 = pygame.image.load("Alien 2 state 2.png").convert_alpha()
+alien2_img_2 = pygame.transform.scale(alien2_img_2, (40,50))
+alien3_img_1 = pygame.image.load("Alien 3 state 1.png").convert_alpha()
+alien3_img_1 = pygame.transform.scale(alien3_img_1, (40,50))
+alien3_img_2 = pygame.image.load("Alien 3 state 2.png").convert_alpha()
+alien3_img_2 = pygame.transform.scale(alien3_img_2, (40,50))
 
-
-alsplode_imgs = [pygame.image.load(f'{IMG_DIR}alsplode-{i}.png') for i in range(1,6)]
+alsplode_imgs = [pygame.image.load(f'alsplode-{i}.png') for i in range(1,6)]
 alsplode_anim = [pygame.transform.scale(i, (50,50)) for i in alsplode_imgs]
 
-cannon1 = pygame.image.load(IMG_DIR+"Cannon_loaded.png").convert_alpha()
-cannon1 = pygame.transform.scale(cannon1, (90,45))
-cannon2 = pygame.image.load(IMG_DIR+"Cannon_empty.png").convert_alpha()
-cannon2 = pygame.transform.scale(cannon2, (90,45))
-
-SFX_DIR='Space Invaders/Sounds/'
-alien_die_sound = pygame.mixer.Sound(SFX_DIR+'Alien_death.wav')
-shoot_sound = pygame.mixer.Sound(SFX_DIR + 'Cannon_shot.wav')
+cannon1 = pygame.image.load("Cannon_loaded.png").convert_alpha()
+cannon1 = pygame.transform.scale(cannon1, (100,50))
+cannon2 = pygame.image.load("Cannon_empty.png").convert_alpha()
+cannon2 = pygame.transform.scale(cannon2, (100,50))
 
 
 player=cannon()
@@ -242,7 +242,7 @@ round=0
 aldirection=(40,0)
 down=False
 albullets=[]
-shotprob=1000*len(aliens[2:])*len(aliens1)
+shotprob=500*len(aliens[2:])*len(aliens1)
 deathanim=0
 anifreq=1400
 movfreq=2500
@@ -288,9 +288,8 @@ while running and check(aliens):
                 aldirection = (0,gap_distance)
                 movfreq=max(300,movfreq-100)
                 anifreq=max(200,anifreq-70)
-                shotprob=max(100,shotprob-30)
+                shotprob=max(100,shotprob-100)
                 down=True
-
         for i in aliens:
             for j in range(len(i)):
                 i[j].rect.centerx+=aldirection[0]
@@ -298,7 +297,7 @@ while running and check(aliens):
 
         movtime=pygame.time.get_ticks()
 
-    for i in aliens[:-2]:
+    for i in aliens[2:]:
         for j in i:
             if r(1,shotprob)==1 and j.state == 'ALIVE' and j.bullets < 3:
                 albullets.append(alshot(j))
