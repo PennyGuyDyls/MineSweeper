@@ -234,7 +234,7 @@ screen=pygame.display.set_mode((1500,1000))
 clock=pygame.time.Clock()
 font=pygame.font.SysFont(None, 100)
 
-IMG_DIR='Space Invaders/Images/'
+IMG_DIR='Arcade/Space Invaders/Images/'
 alimages = [[pygame.image.load(f"{IMG_DIR}Alien {i} state {j}.png").convert_alpha() for j in range(1,3)] for i in range(1,4)]
 scalefactors= [[(40,40),(33,40)],[(30,50),(40,50)],[(40,50),(40,50)]]
 for i in range(len(alimages)):
@@ -250,7 +250,7 @@ cannon1 = pygame.transform.scale(cannon1, (90,45))
 cannon2 = pygame.image.load(IMG_DIR+"Cannon_empty.png").convert_alpha()
 cannon2 = pygame.transform.scale(cannon2, (90,45))
 
-SFX_DIR='Space Invaders/Sounds/'
+SFX_DIR='Arcade/Space Invaders/Sounds/'
 alien_die_sound = pygame.mixer.Sound(SFX_DIR+'Alien_death.wav')
 shoot_sound = pygame.mixer.Sound(SFX_DIR + 'Cannon_shot.wav')
 
