@@ -1,0 +1,121 @@
+import pygame
+
+dark=(150,255,150)
+light=(100,255,100)
+black=(0,0,0)
+white=(255,255,255)
+grey=(130,200,130)
+class game():
+    def __init__(self):
+        self.backboard = [[dark if (row + col) % 2 == 0 else light for col in range(8)] for row in range(8)]
+        self.board = [[black if (row + col) % 2 == 0 else 0 for col in range(8)] for row in range(3)]
+        for row in range(2):
+            self.board.append([0 for col in range(8)])
+        for row in range(3):
+            self.board.append([white if (row + col) % 2 == 1 else 0 for col in range(8)])
+        self.turn=white
+        self.action_piece=None
+
+    def select(self,row,col):
+        moved=False
+        jumped=False
+        try:
+            if self.board[row][col]==grey:
+                row_mod,col_mod=0,0
+                if row-self.action_piece[0]==2:
+                    row_mod=1
+                    jumped=True
+                elif self.action_piece[0]-row==2:
+                    row_mod=-1
+                    jumped=True
+                if col-self.action_piece[1]==2:
+                    col_mod=1
+                elif col-self.action_piece[1]==-2:
+                    col_mod=-1
+            
+                self.board[row][col]=self.board[self.action_piece[0]][self.action_piece[1]]
+                self.board[self.action_piece[0]+row_mod][self.action_piece[1]+col_mod]=0
+                self.board[self.action_piece[0]][self.action_piece[1]]=0
+                moved=True
+        except: pass
+
+        for i in range(len(self.board)):
+            for j in range(len(self.board[i])):
+                if self.board[i][j]==grey:
+                    self.board[i][j]=0
+
+        if self.board[row][col]==self.turn:
+            if self.turn==white:
+                modify=-1
+            elif self.turn==black:
+                modify=1
+        else:
+            return None
+
+        if moved:
+            self.action_piece=[row,col]
+            if jumped:
+                jumped=False
+                if col-2>=0 and self.board[row+modify*2][col-2]==0:
+                    self.board[row+modify*2][col-2]=grey
+                    jumped=True
+                if col+2<8 and self.board[row+modify*2][col+2]==0:
+                    self.board[row+modify*2][col+2]=grey
+                    jumped=True
+            if not jumped:
+                self.swap_turn()
+            return None
+
+        
+        
+
+        self.action_piece=[row,col]
+
+        if 0<=row+modify<8:
+            if col-1>=0 and self.board[row+modify][col-1]==0:
+                self.board[row+modify][col-1]=grey
+            elif col-1>=0 and self.board[row+modify][col-1]!=self.turn:
+                if col-2>=0 and self.board[row+modify*2][col-2]==0:
+                    self.board[row+modify*2][col-2]=grey
+            if col+1<8 and self.board[row+modify][col+1]==0:
+                self.board[row+modify][col+1]=grey
+            elif col+1<8 and self.board[row+modify][col+1]!=self.turn:
+                if col+2<8 and self.board[row+modify*2][col+2]==0:
+                    self.board[row+modify*2][col+2]=grey
+
+
+
+    def swap_turn(self):
+        if self.turn==white:
+            self.turn=black
+        elif self.turn==black:
+            self.turn=white
+        
+
+
+
+def show():
+    for i in range(len(checkers.backboard)):
+        for j in range(len(checkers.backboard[i])):
+            pygame.draw.rect(screen,checkers.backboard[i][j],(j*100,i*100 , 100, 100))
+            if checkers.board[i][j]:
+                pygame.draw.circle(screen,checkers.board[i][j], (j*100+50,i*100+50), 35)
+
+checkers=game()
+pygame.init()
+screen=pygame.display.set_mode((800,800))
+show()
+pygame.display.flip()
+running = True
+while running:
+    
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running=False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mx,my = pygame.mouse.get_pos()
+            row,col=my//100,mx//100
+            checkers.select(row,col)
+            show()
+            pygame.display.flip()
+            
