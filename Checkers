@@ -15,8 +15,11 @@ class game():
             self.board.append([white if (row + col) % 2 == 1 else 0 for col in range(8)])
         self.turn=white
         self.action_piece=None
-
+        self.piece_lock=False
     def select(self,row,col):
+        if self.piece_lock and self.board[row][col]!=grey:
+            return None
+        
         moved=False
         jumped=False
         try:
@@ -44,6 +47,7 @@ class game():
                 if self.board[i][j]==grey:
                     self.board[i][j]=0
 
+        modify=0
         if self.board[row][col]==self.turn:
             if self.turn==white:
                 modify=-1
@@ -54,16 +58,20 @@ class game():
 
         if moved:
             self.action_piece=[row,col]
-            if jumped:
+            if jumped: # check if another jump is available
                 jumped=False
-                if col-2>=0 and self.board[row+modify*2][col-2]==0:
+                if col-2>=0 and self.board[row+modify*2][col-2]==0 and self.board[row+modify][col-1]==(white if self.turn==black else black):
                     self.board[row+modify*2][col-2]=grey
                     jumped=True
-                if col+2<8 and self.board[row+modify*2][col+2]==0:
+                if col+2<8 and self.board[row+modify*2][col+2]==0 and self.board[row+modify][col+1]==(white if self.turn==black else black):
                     self.board[row+modify*2][col+2]=grey
                     jumped=True
+
             if not jumped:
+                self.piece_lock=False
                 self.swap_turn()
+                return None
+            self.piece_lock=True
             return None
 
         
