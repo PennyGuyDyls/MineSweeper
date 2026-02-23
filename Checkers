@@ -109,6 +109,13 @@ def show():
             if checkers.board[i][j]:
                 pygame.draw.circle(screen,checkers.board[i][j], (j*100+50,i*100+50), 35)
 
+class piece(pygame.sprite.Sprite):
+    def __init__(self,colour,x,y):
+        super().__init__()
+        self.image=self.image = pygame.Surface((50,50),pygame.SRCALPHA)
+        self.rect = self.image.get_rect()
+        self.rect.center = (750,500)
+
 checkers=game()
 pygame.init()
 screen=pygame.display.set_mode((800,800))
