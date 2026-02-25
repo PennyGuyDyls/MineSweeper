@@ -34,6 +34,8 @@ class game():
         self.turn=0
         self.dots=[]
         self.action_piece=None
+        self.blackincheck=False
+        self.whiteincheck=False
 
     def select(self,row,col):
 
@@ -54,6 +56,23 @@ class game():
             self.turn=0
         else:
             self.turn=1
+
+    def in_check(self):
+        self.blackincheck=False
+        self.whiteincheck=False
+        end=False
+        for i in range(8):
+            for j in range(8):
+                if isinstance(self.board[i][j],Piece):
+                    for k in self.board[i][j].check_possible_moves(self.board):
+                        if isinstance(self.board[k[1]][k[0]],king) and self.board[k[1]][k[0]].colour==self.board[i][j].oppcolour:
+                            if self.board[i][j].oppcolour==0:
+                                self.blackincheck=True
+                                return None
+                            else:
+                                self.whiteincheck=True
+                                return None
+
 
 
 class Piece(pygame.sprite.Sprite):
@@ -234,7 +253,6 @@ class queen(Piece):
 
     def check_possible_moves(self,board):
         return self.checks_for_lines(board,[[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]])
-
 
 class king(Piece):
     def __init__(self, colour,x,y):
