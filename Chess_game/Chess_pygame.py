@@ -1,9 +1,11 @@
 import pygame
-dark=(150,255,150)
-light=(100,255,100)
+import copy
+light=(150,255,150)
+dark=(100,255,100)
 black=(0,0,0)
 white=(255,255,255)
 grey=(0,0,0,150)
+red=(255,0,0)
 
 class game():
     def __init__(self):
@@ -34,22 +36,37 @@ class game():
         self.turn=0
         self.dots=[]
         self.action_piece=None
+        self.moving=None
         self.blackincheck=False
         self.whiteincheck=False
+        self.red_square=None
+        self.moved=False
 
     def select(self,row,col):
 
         if [col,row] in self.dots:
             self.board=self.action_piece.move(self.board,row,col)
+            self.moved=True
             self.swap_turn()
             self.dots=[]
+            pos = self.in_check()
+            if pos != None:
+                x,y = pos
+            else:
+                self.red_square=None
+            if self.blackincheck or self.whiteincheck:
+                self.red_square=[x,y]
 
         elif self.board[row][col] == 0:
+            self.moved=False
+            self.action_piece=None
             self.dots=[]
 
         elif isinstance(self.board[row][col],Piece) and self.board[row][col].colour==self.turn:
+            self.moved=False
             self.action_piece=self.board[row][col]
             self.dots=self.board[row][col].check_possible_moves(self.board)
+            self.dots=self.action_piece.check_legality(self.board,self.dots)
 
     def swap_turn(self):
         if self.turn:
@@ -60,7 +77,6 @@ class game():
     def in_check(self):
         self.blackincheck=False
         self.whiteincheck=False
-        end=False
         for i in range(8):
             for j in range(8):
                 if isinstance(self.board[i][j],Piece):
@@ -68,10 +84,13 @@ class game():
                         if isinstance(self.board[k[1]][k[0]],king) and self.board[k[1]][k[0]].colour==self.board[i][j].oppcolour:
                             if self.board[i][j].oppcolour==0:
                                 self.blackincheck=True
-                                return None
+                                return k[0],k[1]
                             else:
                                 self.whiteincheck=True
-                                return None
+                                return k[0],k[1]
+        self.blackincheck=False
+        self.whiteincheck=False
+        return None
 
 
 
@@ -120,6 +139,75 @@ class Piece(pygame.sprite.Sprite):
         board[y][x]=self
         return board
     
+    def logic_move(self,board,y,x):
+        if self.type=='PAWN':
+            self.move2=False
+
+
+        elif self.type == 'KING':
+            self.moved=True
+            if x-self.posx==2:
+                board[self.posy][7].move(board,self.posy,5)
+            if x-self.posx==-2:
+                board[self.posy][0].move(board,self.posy,3)
+
+        elif self.type =='ROOK':
+            self.moved=True
+
+        board[self.posy][self.posx]=0
+        self.posx,self.posy=x,y
+        board[y][x]=self
+        return board
+    
+    def logic_clone(self):
+        new = object.__new__(type(self))
+        new.colour = self.colour
+        new.oppcolour = self.oppcolour
+        new.posx = self.posx
+        new.posy = self.posy
+        new.moved = getattr(self, "moved", False)
+        new.move2 = getattr(self, "move2", False)
+        new.type = self.type
+        new.mod = getattr(self,'mod',False)
+        return new
+
+
+    def clone_board(self,board):
+        new_board = [[0 for i in range(8)] for j in range(8)]
+        for y in range(8):
+            for x in range(8):
+                if board[y][x] == 0:
+                    pass
+                else:
+                    new_board[y][x] = board[y][x].logic_clone()
+        return new_board
+
+
+    def check_legality(self,board,dots):
+        for i in reversed(range(len(dots))):
+            fakeboard=self.clone_board(board)
+            fakeboard[self.posy][self.posx].logic_move(fakeboard,dots[i][1],dots[i][0])
+            checked = self.in_check(fakeboard)
+            if checked:
+                if checked=='BLACK' and self.colour==0:
+                    dots.pop(i)
+                elif checked=='WHITE' and self.colour==1:
+                    dots.pop(i)
+        return dots
+
+    def in_check(self,board):
+        for i in range(8):
+            for j in range(8):
+                if isinstance(board[i][j],Piece):
+                    for k in board[i][j].check_possible_moves(board):
+                        if isinstance(board[k[1]][k[0]],king) and board[k[1]][k[0]].colour==board[i][j].oppcolour:
+                            if board[i][j].oppcolour==0:
+                                return 'BLACK'
+                            else:
+                                return 'WHITE'
+        return False
+
+    
     def checks_for_lines(self, board,directions):
         dots=[]
 
@@ -135,6 +223,12 @@ class Piece(pygame.sprite.Sprite):
                     break
 
         return dots
+    
+    def follow(self,x,y):
+        self.rect.center = (x,y)
+
+    def cancel_follow(self):
+        self.rect.center = (self.posx*100+50,self.posy*100+50)
     
 
 class pawn(Piece):
@@ -172,6 +266,7 @@ class pawn(Piece):
         newx=self.posx+1
         if self.check_valid_location(board,newx,newy):
             dots.append([newx,newy])
+        
         return dots    
 
 class knight(Piece):
@@ -310,14 +405,20 @@ def show():
     for i in range(8):
         for j in range(8):
             pygame.draw.rect(screen,chess.backboard[i][j],(j*100,i*100 , 100, 100))
-
+    if chess.red_square!=None:
+        pygame.draw.circle(screen,red,(chess.red_square[0]*100+50,chess.red_square[1]*100+50), 48)
+    for i in range(8):
+        for j in range(8):
             if chess.board[i][j]==0:
                 pass
-            else:
+            elif chess.board[i][j]!=chess.action_piece:
                 screen.blit(chess.board[i][j].image,chess.board[i][j].rect)
 
     for i in chess.dots:
-        draw_dot(i[0],i[1])
+        draw_dot(i[0],i[1])    
+
+    if isinstance(chess.action_piece,Piece):
+        screen.blit(chess.action_piece.image,chess.action_piece.rect)
 
 
 def draw_dot(x,y):
@@ -337,7 +438,7 @@ screen=pygame.display.set_mode((800,800))
 
 
 
-
+hover = False
 running=True
 while running:
     show()
@@ -350,4 +451,22 @@ while running:
             mx,my = pygame.mouse.get_pos()
             row,col=my//100,mx//100
             chess.select(row,col)
+            if chess.moved:
+                hover=False
+            else:
+                hover=True
+                if isinstance(chess.action_piece,Piece):
+                    chess.action_piece.follow(mx,my)
+        elif event.type == pygame.MOUSEBUTTONUP and hover:
+            mx,my = pygame.mouse.get_pos()
+            row,col=my//100,mx//100
+            if isinstance(chess.action_piece,Piece):
+                chess.action_piece.cancel_follow()
+            chess.select(row,col)
+            hover=False
             
+        elif event.type == pygame.MOUSEMOTION and hover:  
+            mx,my=pygame.mouse.get_pos()
+            if isinstance(chess.action_piece,Piece):
+                chess.action_piece.follow(mx,my)
+        
