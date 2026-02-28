@@ -442,11 +442,11 @@ def menu(start):
 
     stcolour=(0,200,0)
     excolour=(200,0,0)
-    font=pygame.font.SysFont(None, 90)
+    font=pygame.font.SysFont(None, 85)
     if start:
         sttext=font.render('START',True,(255,255,255))
     else:
-        sttext=font.render('RESTART',True,(255,255,255))
+        sttext=font.render('REMATCH',True,(255,255,255))
     extext=font.render('LEAVE',True,(255,255,255))
     while True:
 
@@ -486,6 +486,11 @@ def menu(start):
 
 
 def show():
+    def draw_dot(x,y):
+        surf = pygame.Surface((100, 100), pygame.SRCALPHA)
+        pygame.draw.circle(surf, (grey), (50,50), 20)
+        screen.blit(surf, (x*100,y*100))
+
     for i in range(8):
         for j in range(8):
             pygame.draw.rect(screen,chess.backboard[i][j],(j*100,i*100 , 100, 100))
@@ -503,11 +508,6 @@ def show():
 
     if isinstance(chess.action_piece,Piece):
         screen.blit(chess.action_piece.image,chess.action_piece.rect)
-
-def draw_dot(x,y):
-    surf = pygame.Surface((100, 100), pygame.SRCALPHA)
-    pygame.draw.circle(surf, (grey), (50,50), 20)
-    screen.blit(surf, (x*100,y*100))
 
 
 pygame.init()
@@ -570,5 +570,3 @@ while running:
         pygame.time.wait(1500)
         running=menu(False)
         chess=game()
-
-        
